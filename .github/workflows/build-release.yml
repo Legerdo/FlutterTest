@@ -1,11 +1,11 @@
-name: Manual Debug APK Build
+name: Manual Release APK Build
 
 on:
-  workflow_dispatch: # push 트리거를 삭제하고 이 줄만 남겨두면 수동 실행만 가능해집니다.
+  workflow_dispatch: # 이 설정만 남겨두면 오직 수동으로 버튼을 눌렀을 때만 실행됩니다.
 
 jobs:
   build:
-    runs-on: ubuntu-latest # Public 저장소에서 무료로 가장 빠르게 동작하는 환경
+    runs-on: ubuntu-latest # 안드로이드 빌드이므로 우분투 환경 사용
 
     steps:
       # 1. 저장소 코드 가져오기
@@ -24,19 +24,19 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true 
+          cache: true
 
       # 4. 패키지 다운로드
       - name: Get dependencies
         run: flutter pub get
 
-      # 5. APK 빌드 (Debug)
-      - name: Build APK (Debug)
-        run: flutter build apk --debug
+      # 5. APK 빌드 (Release 모드)
+      - name: Build APK (Release)
+        run: flutter build apk --release
 
-      # 6. 빌드된 APK 파일 업로드
-      - name: Upload APK
+      # 6. 빌드된 릴리즈 APK를 다운로드할 수 있도록 업로드
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          name: release-apk # 다운로드될 압축파일 이름
+          path: build/app/outputs/flutter-apk/app-release.apk
