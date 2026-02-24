@@ -1,0 +1,44 @@
+name: Fast Flutter APK Build Test
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # GitHub 웹페이지에서 수동으로 버튼을 눌러 실행할 수 있게 해줍니다.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Public 저장소에서 무료로 가장 빠르게 동작하는 환경
+
+    steps:
+      # 1. 저장소 코드 가져오기
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Java 환경 설정 (안드로이드 빌드에 필요, 최신 Flutter는 Java 17 권장)
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # 3. Flutter 환경 설정 (캐시 적용으로 다음 빌드부터 속도 향상)
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true # 캐싱 활성화 (빠른 테스트의 핵심)
+
+      # 4. 패키지 다운로드
+      - name: Get dependencies
+        run: flutter pub get
+
+      # 5. APK 빌드 (가장 빠른 테스트를 위해 --debug 사용)
+      - name: Build APK (Debug)
+        run: flutter build apk --debug
+
+      # 6. 빌드된 APK 파일을 GitHub 결과물(Artifact)로 업로드
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-debug-apk # 다운로드 받을 압축파일 이름
+          path: build/app/outputs/flutter-apk/app-debug.apk
